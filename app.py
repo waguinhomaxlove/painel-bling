@@ -161,15 +161,16 @@ def callback():
 
     response = requests.post(TOKEN_URL, data=data, headers=headers)
 
-    print("🔁 Resposta do Bling:")
-    print("Status:", response.status_code)
-    print("Body:", response.text)
-
     if response.status_code == 200:
         token_data = response.json()
         session['bling_token'] = token_data.get('access_token')
         return redirect(url_for('produtos_bling'))
-    return "Erro ao obter token Bling."
+
+    return f"""
+        <h2>Erro ao obter token Bling</h2>
+        <p>Status: {response.status_code}</p>
+        <pre>{response.text}</pre>
+    """
 
 @app.route('/produtos-bling')
 def produtos_bling():
