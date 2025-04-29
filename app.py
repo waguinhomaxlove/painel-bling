@@ -142,4 +142,5 @@ def produtos_bling():
     return render_template("produtos_bling.html", produtos=produtos)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(debug=True, host="0.0.0.0", port=port)
