@@ -19,11 +19,16 @@
             </div>
         </div>
 
-        <!-- Campo de busca -->
-        <form method="GET" action="{{ url_for('dashboard') }}" class="mb-6">
-            <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar por SKU ou nome..."
-                class="w-full border border-gray-300 p-3 rounded shadow-sm" />
-        </form>
+        <!-- Filtro e Exportar -->
+        <div class="flex justify-between mb-6">
+            <form method="GET" action="{{ url_for('dashboard') }}" class="w-3/4">
+                <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar por SKU ou nome..."
+                    class="w-full border border-gray-300 p-3 rounded shadow-sm" />
+            </form>
+            <a href="{{ url_for('exportar') }}" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded h-min">
+                📥 Exportar Excel
+            </a>
+        </div>
 
         <div class="bg-white shadow-md rounded-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold mb-4">Adicionar Produto</h2>
@@ -51,6 +56,7 @@
                             <th class="py-2 px-4 border-b">Preço</th>
                             <th class="py-2 px-4 border-b">Custo</th>
                             <th class="py-2 px-4 border-b">Última Atualização</th>
+                            <th class="py-2 px-4 border-b">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,6 +68,11 @@
                             <td class="py-2 px-4 border-b">R$ {{ produto[3] }}</td>
                             <td class="py-2 px-4 border-b">R$ {{ produto[4] }}</td>
                             <td class="py-2 px-4 border-b">{{ produto[5] }}</td>
+                            <td class="py-2 px-4 border-b flex gap-2 justify-center">
+                                <a href="{{ url_for('editar', sku=produto[0]) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1 px-3 rounded text-sm">Editar</a>
+                                <a href="{{ url_for('excluir', sku=produto[0]) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
+                                   onclick="return confirm('Tem certeza que deseja excluir este produto?');">Excluir</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

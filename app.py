@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
+import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta_aqui'
@@ -100,6 +101,50 @@ def adicionar():
     conn.close()
 
     return redirect('/dashboard')
+
+@app.route('/editar/<sku>', methods=['GET', 'POST'])
+@login_required
+def editar(sku):
+    conn = sqlite3.connect("painel.db")
+    cursor = conn.cursor()
+    if request.method == 'POST':
+        nome = request.form['nome']
+        estoque = request.form['estoque']
+        preco = request.form['preco']
+        custo = request.form['custo']
+
+        cursor.execute("""
+            UPDATE produtos SET nome = ?, estoque = ?, preco = ?, custo = ?, atualizado_em = datetime('now', 'localtime')
+            WHERE sku = ?
+        """, (nome, estoque, preco, custo, sku))
+        conn.commit()
+        conn.close()
+        return redirect('/dashboard')
+
+    produto = cursor.execute("SELECT * FROM produtos WHERE sku = ?", (sku,)).fetchone()
+    conn.close()
+    return render_template("editar.html", produto=produto)
+
+@app.route('/excluir/<sku>')
+@login_required
+def excluir(sku):
+    conn = sqlite3.connect("painel.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM produtos WHERE sku = ?", (sku,))
+    conn.commit()
+    conn.close()
+    return redirect('/dashboard')
+
+@app.route('/exportar')
+@login_required
+def exportar():
+    conn = sqlite3.connect("painel.db")
+    df = pd.read_sql_query("SELECT sku, nome, estoque, preco, custo, atualizado_em FROM produtos", conn)
+    conn.close()
+
+    path = "produtos_exportados.xlsx"
+    df.to_excel(path, index=False)
+    return send_file(path, as_attachment=True)
 
 @app.route('/calculadora', methods=['GET', 'POST'])
 @login_required
