@@ -56,7 +56,6 @@ def usuarios():
         return redirect(url_for('login'))
 
     conn = get_db_connection()
-
     if request.method == 'POST':
         email = request.form['email']
         senha = request.form['senha']
@@ -99,7 +98,7 @@ def editar(sku):
     conn.close()
     return render_template('editar.html', produto=produto)
 
-        @app.route('/excluir/<sku>')
+@app.route('/excluir/<sku>')
 def excluir(sku):
     conn = get_db_connection()
     conn.execute('DELETE FROM produtos WHERE sku = ?', (sku,))
