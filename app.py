@@ -101,11 +101,24 @@ def calculadora():
     resultado = None
     if request.method == 'POST':
         try:
-            valor = float(request.form.get('valor', 0))
-            resultado = round(valor * 5.90, 2)
+            valor_dolar = float(request.form.get('valor', 0))
+
+            cotacao = 5.90
+            comissao_vendedor = 0.15
+            impostos = 0.10
+            comissao_marketplace = 0.18
+            lucro_liquido_desejado = 0.15
+
+            custo_base = valor_dolar * cotacao
+            custo_total = custo_base * (1 + comissao_vendedor + impostos)
+
+            preco_final = custo_total / (1 - comissao_marketplace - lucro_liquido_desejado)
+            resultado = round(preco_final, 2)
+
         except Exception as e:
-            print("Erro no cálculo:", e)
-            resultado = "Erro ao calcular"
+            print("Erro na calculadora:", e)
+            resultado = "Erro ao calcular."
+
     return render_template("calculadora.html", resultado=resultado)
 
 @app.route('/usuarios', methods=['GET', 'POST'])
