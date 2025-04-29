@@ -5,7 +5,7 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_aqui'  # troque depois para segurança real
+app.secret_key = 'sua_chave_secreta_aqui'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -76,6 +76,11 @@ def dashboard():
     produtos = cursor.execute("SELECT * FROM produtos").fetchall()
     conn.close()
     return render_template("dashboard.html", produtos=produtos)
+
+@app.route('/calculadora')
+@login_required
+def calculadora():
+    return render_template("calculadora.html")
 
 # -------------------- CRIAR USUÁRIO (manual) --------------------
 @app.route('/criar-usuario')
