@@ -1,0 +1,7 @@
+*.exe
+*.zip
+*.tar
+*.rar
+node_modules/
+__pycache__/
+.env

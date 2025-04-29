@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Painel Bling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="w-20">
+                <h1 class="text-3xl font-bold text-green-700">Painel Bling</h1>
+            </div>
+            <div class="flex gap-2">
+                <a href="{{ url_for('calculadora') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">🔢 Calculadora</a>
+                <a href="{{ url_for('logout') }}" class="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">Logout</a>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Adicionar Produto</h2>
+            <form method="post" action="{{ url_for('adicionar') }}" class="grid grid-cols-2 gap-4">
+                <input type="text" name="sku" placeholder="SKU" required class="border p-2 rounded">
+                <input type="text" name="nome" placeholder="Nome" required class="border p-2 rounded">
+                <input type="number" name="estoque" placeholder="Estoque" required class="border p-2 rounded">
+                <input type="text" name="preco" placeholder="Preço" required class="border p-2 rounded">
+                <input type="text" name="preco_custo" placeholder="Preço de Custo" required class="border p-2 rounded">
+                <div class="col-span-2 text-right">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">Adicionar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Produtos</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="py-2 px-4 border-b">SKU</th>
+                            <th class="py-2 px-4 border-b">Nome</th>
+                            <th class="py-2 px-4 border-b">Estoque</th>
+                            <th class="py-2 px-4 border-b">Preço</th>
+                            <th class="py-2 px-4 border-b">Preço de Custo</th>
+                            <th class="py-2 px-4 border-b">Última Atualização</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produto in produtos %}
+                        <tr class="text-center hover:bg-gray-100">
+                            <td class="py-2 px-4 border-b">{{ produto['sku'] }}</td>
+                            <td class="py-2 px-4 border-b">{{ produto['nome'] }}</td>
+                            <td class="py-2 px-4 border-b">{{ produto['estoque'] }}</td>
+                            <td class="py-2 px-4 border-b">R$ {{ produto['preco'] }}</td>
+                            <td class="py-2 px-4 border-b">R$ {{ produto['preco_custo'] }}</td>
+                            <td class="py-2 px-4 border-b">{{ produto['ultima_atualizacao'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
