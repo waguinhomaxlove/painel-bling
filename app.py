@@ -146,6 +146,11 @@ def callback():
         'Content-Type': 'application/x-www-form-urlencoded'
     }
     response = requests.post(TOKEN_URL, data=data, headers=headers)
+
+        print("🔁 Resposta do Bling:")
+    print("Status:", response.status_code)
+    print("Body:", response.text)
+    
     if response.status_code == 200:
         token_data = response.json()
         session['bling_token'] = token_data.get('access_token')
