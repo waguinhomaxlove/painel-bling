@@ -163,6 +163,24 @@ def exportar():
     output.headers["Content-type"] = "text/csv"
     return output
 
+@app.route('/editar/<sku>', methods=['GET', 'POST'])
+def editar(sku):
+    conn = get_db_connection()
+    if request.method == 'POST':
+        nome = request.form['nome']
+        estoque = request.form['estoque']
+        preco = request.form['preco']
+        preco_custo = request.form['preco_custo']
+        conn.execute('UPDATE produtos SET nome=?, estoque=?, preco=?, preco_custo=? WHERE sku=?',
+                     (nome, estoque, preco, preco_custo, sku))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('dashboard'))
+
+    produto = conn.execute('SELECT * FROM produtos WHERE sku=?', (sku,)).fetchone()
+    conn.close()
+    return render_template('editar.html', produto=produto)
+    
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port, debug=True)
