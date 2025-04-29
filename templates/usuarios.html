@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Usuários - Painel Bling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6">
+    <div class="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl mt-10">
+        <h2 class="text-2xl font-bold mb-6 text-green-700 text-center">Gerenciar Usuários</h2>
+
+        <!-- Formulário para criar novo usuário -->
+        <form method="POST" class="flex flex-col gap-4 mb-8">
+            <input type="email" name="email" placeholder="E-mail" required class="border p-2 rounded">
+            <input type="password" name="senha" placeholder="Senha" required class="border p-2 rounded">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded">Adicionar Usuário</button>
+        </form>
+
+        <!-- Lista de usuários existentes -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white text-center">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="py-2 px-4 border-b">ID</th>
+                        <th class="py-2 px-4 border-b">E-mail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr class="hover:bg-gray-100">
+                        <td class="py-2 px-4 border-b">{{ usuario[0] }}</td>
+                        <td class="py-2 px-4 border-b">{{ usuario[1] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="{{ url_for('dashboard') }}" class="text-green-700 font-bold hover:underline">← Voltar para Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

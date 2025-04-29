@@ -102,7 +102,25 @@ def adicionar():
 def calculadora():
     return render_template("calculadora.html")
 
-# -------------------- CRIAR USUÁRIO (manual) --------------------
+@app.route('/usuarios', methods=['GET', 'POST'])
+@login_required
+def usuarios():
+    conn = sqlite3.connect("painel.db")
+    cursor = conn.cursor()
+    if request.method == 'POST':
+        email = request.form['email']
+        senha = request.form['senha']
+        senha_hash = generate_password_hash(senha)
+        try:
+            cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, senha_hash))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            return "Email já cadastrado."
+
+    lista = cursor.execute("SELECT id, email FROM users").fetchall()
+    conn.close()
+    return render_template("usuarios.html", usuarios=lista)
+
 @app.route('/criar-usuario')
 def criar_usuario():
     email = "admin@painel.com"
