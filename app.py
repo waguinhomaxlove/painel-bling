@@ -4,9 +4,18 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
 import pandas as pd
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta_aqui'
+
+# Bling API v3 Configuração
+CLIENT_ID = 'c0588a73f49371b037d8bb333c059e29406c7850'
+CLIENT_SECRET = 'ce2bdfe24c2c87a804e7f5386fbd305c83a884c68a3db30823fc35c8e4f2'
+REDIRECT_URI = 'https://painel-bling.onrender.com/callback'
+API_TOKEN_URL = 'https://api.bling.com.br/oauth/token'
+
+access_token = None
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -66,6 +75,35 @@ def login():
 def logout():
     logout_user()
     return redirect('/login')
+
+# Bling OAuth v3 fluxo
+@app.route('/auth')
+@login_required
+def auth():
+    auth_url = f"https://www.bling.com.br/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
+    return redirect(auth_url)
+
+@app.route('/callback')
+def callback():
+    global access_token
+    code = request.args.get('code')
+    if code:
+        payload = {
+            'grant_type': 'authorization_code',
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'redirect_uri': REDIRECT_URI,
+            'code': code
+        }
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        response = requests.post(API_TOKEN_URL, data=payload, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            access_token = data['access_token']
+            return redirect('/dashboard')
+        else:
+            return 'Erro ao obter token Bling.'
+    return 'Nenhum código recebido.'
 
 @app.route('/dashboard')
 @login_required
