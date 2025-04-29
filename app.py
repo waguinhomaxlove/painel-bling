@@ -159,42 +159,49 @@ def callback():
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
-    response = requests.post(TOKEN_URL, data=data, headers=headers)
+    try:
+        response = requests.post(TOKEN_URL, data=data, headers=headers)
+        response.raise_for_status()  # Vai gerar uma exceção para erros de status HTTP 4xx ou 5xx
 
-    if response.status_code == 200:
         token_data = response.json()
         session['bling_token'] = token_data.get('access_token')
         return redirect(url_for('produtos_bling'))
 
-    return f"""
-        <h2>Erro ao obter token Bling</h2>
-        <p>Status: {response.status_code}</p>
-        <pre>{response.text}</pre>
-    """
+    except requests.exceptions.RequestException as e:
+        return f"Erro ao obter o token Bling: {str(e)}"
 
 @app.route('/produtos-bling')
 def produtos_bling():
     token = session.get('bling_token')
     if not token:
         return redirect(url_for('auth'))
+
     headers = {
         "Authorization": f"Bearer {token}"
     }
+
     response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
+
     if response.status_code != 200:
-        return "Erro ao buscar produtos do Bling: " + response.text
-    data = response.json()
-    produtos = []
-    if 'data' in data:
-        for item in data['data']:
-            produto = item.get('produto', {})
-            produtos.append({
-                'codigo': produto.get('codigo', ''),
-                'nome': produto.get('nome', ''),
-                'estoqueAtual': produto.get('estoqueAtual', 0),
-                'preco': produto.get('preco', '0.00')
-            })
-    return render_template("produtos_bling.html", produtos=produtos)
+        # Tratamento de erro de status
+        return f"Erro ao buscar produtos do Bling: Status Code {response.status_code} - {response.text}"
+
+    try:
+        data = response.json()
+        produtos = []
+        if 'data' in data:
+            for item in data['data']:
+                produto = item.get('produto', {})
+                produtos.append({
+                    'codigo': produto.get('codigo', ''),
+                    'nome': produto.get('nome', ''),
+                    'estoqueAtual': produto.get('estoqueAtual', 0),
+                    'preco': produto.get('preco', '0.00')
+                })
+        return render_template("produtos_bling.html", produtos=produtos)
+
+    except ValueError:
+        return "Erro: resposta inválida ao tentar decodificar JSON da API do Bling."
 
 @app.route('/exportar')
 def exportar():
