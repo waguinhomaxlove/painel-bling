@@ -82,36 +82,6 @@ def calculadora():
             resultado = 'Erro no cálculo'
     return render_template("calculadora.html", resultado=resultado)
 
-@app.route('/callback')
-def callback():
-    code = request.args.get('code')
-    if not code:
-        return "Erro: código de autorização ausente."
-
-    token_url = "https://www.bling.com.br/Api/v3/oauth/token"
-    data = {
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": REDIRECT_URI,
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET
-    }
-    headers = { "Content-Type": "application/x-www-form-urlencoded" }
-
-    try:
-        response = requests.post(token_url, data=data, headers=headers)
-        if response.status_code == 200:
-            token_info = response.json()
-            access_token = token_info.get("access_token")
-            session['bling_token'] = access_token
-            return redirect(url_for('produtos_bling'))
-        else:
-            print("Erro:", response.text)
-            return "Erro ao obter token Bling."
-    except Exception as e:
-        print(e)
-        return "Erro na solicitação do token Bling."
-
 @app.route('/produtos-bling')
 def produtos_bling():
     token = session.get('bling_token')
@@ -141,6 +111,7 @@ def produtos_bling():
 
     return render_template("produtos_bling.html", produtos=produtos)
 
+# 🔧 CORREÇÃO AQUI: porta obrigatória para o Render
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(debug=True, host="0.0.0.0", port=port)
