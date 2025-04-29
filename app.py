@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import requests
+import uuid
 from flask import Flask, render_template, request, redirect, session, url_for, make_response
 
 app = Flask(__name__)
@@ -126,14 +127,26 @@ def calculadora():
 
 @app.route('/auth')
 def auth():
-    url = f"https://www.bling.com.br/Api/v3/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
+    state = str(uuid.uuid4())
+    session['auth_state'] = state
+    url = (
+        "https://www.bling.com.br/Api/v3/oauth/authorize"
+        f"?response_type=code&client_id={CLIENT_ID}"
+        f"&redirect_uri={REDIRECT_URI}"
+        f"&state={state}"
+    )
     return redirect(url)
 
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
-    if not code:
-        return "Erro: código de autorização não encontrado."
+    state = request.args.get('state')
+
+    if not code or not state:
+        return "Erro: código de autorização ou estado ausente."
+
+    if state != session.get('auth_state'):
+        return "Erro: parâmetro de estado inválido."
 
     data = {
         'grant_type': 'authorization_code',
