@@ -102,9 +102,10 @@ def calculadora():
     if request.method == 'POST':
         try:
             valor = float(request.form.get('valor', 0))
-            resultado = round(valor * 5.90, 2)  # exemplo: dólar para real
-        except ValueError:
-            resultado = "Erro de cálculo."
+            resultado = round(valor * 5.90, 2)
+        except Exception as e:
+            print("Erro no cálculo:", e)
+            resultado = "Erro ao calcular"
     return render_template("calculadora.html", resultado=resultado)
 
 @app.route('/usuarios', methods=['GET', 'POST'])
