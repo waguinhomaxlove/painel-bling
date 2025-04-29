@@ -11,7 +11,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# -------------------- MODELO DE USUÁRIO --------------------
 class User(UserMixin):
     def __init__(self, id, email, password):
         self.id = id
@@ -44,7 +43,6 @@ class User(UserMixin):
 def load_user(user_id):
     return User.get_by_id(user_id)
 
-# -------------------- ROTAS --------------------
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -97,10 +95,17 @@ def adicionar():
 
     return redirect('/dashboard')
 
-@app.route('/calculadora')
+@app.route('/calculadora', methods=['GET', 'POST'])
 @login_required
 def calculadora():
-    return render_template("calculadora.html")
+    resultado = None
+    if request.method == 'POST':
+        try:
+            valor = float(request.form.get('valor', 0))
+            resultado = round(valor * 5.90, 2)  # exemplo: dólar para real
+        except ValueError:
+            resultado = "Erro de cálculo."
+    return render_template("calculadora.html", resultado=resultado)
 
 @app.route('/usuarios', methods=['GET', 'POST'])
 @login_required

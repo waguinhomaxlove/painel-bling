@@ -14,6 +14,7 @@
             </div>
             <div class="flex gap-2">
                 <a href="{{ url_for('calculadora') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">🔢 Calculadora</a>
+                <a href="{{ url_for('usuarios') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">👥 Usuários</a>
                 <a href="{{ url_for('logout') }}" class="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">Logout</a>
             </div>
         </div>
@@ -25,7 +26,7 @@
                 <input type="text" name="nome" placeholder="Nome" required class="border p-2 rounded">
                 <input type="number" name="estoque" placeholder="Estoque" required class="border p-2 rounded">
                 <input type="text" name="preco" placeholder="Preço" required class="border p-2 rounded">
-                <input type="text" name="preco_custo" placeholder="Preço de Custo" required class="border p-2 rounded">
+                <input type="text" name="custo" placeholder="Preço de Custo" required class="border p-2 rounded">
                 <div class="col-span-2 text-right">
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">Adicionar</button>
                 </div>
@@ -33,7 +34,7 @@
         </div>
 
         <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4">Produtos</h2>
+            <h2 class="text-2xl font-semibold mb-4">Produtos Cadastrados</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white">
                     <thead>
@@ -49,12 +50,12 @@
                     <tbody>
                         {% for produto in produtos %}
                         <tr class="text-center hover:bg-gray-100">
-                            <td class="py-2 px-4 border-b">{{ produto['sku'] }}</td>
-                            <td class="py-2 px-4 border-b">{{ produto['nome'] }}</td>
-                            <td class="py-2 px-4 border-b">{{ produto['estoque'] }}</td>
-                            <td class="py-2 px-4 border-b">R$ {{ produto['preco'] }}</td>
-                            <td class="py-2 px-4 border-b">R$ {{ produto['preco_custo'] }}</td>
-                            <td class="py-2 px-4 border-b">{{ produto['ultima_atualizacao'] }}</td>
+                            <td class="py-2 px-4 border-b">{{ produto[0] }}</td>
+                            <td class="py-2 px-4 border-b">{{ produto[1] }}</td>
+                            <td class="py-2 px-4 border-b">{{ produto[2] }}</td>
+                            <td class="py-2 px-4 border-b">R$ {{ produto[3] }}</td>
+                            <td class="py-2 px-4 border-b">R$ {{ produto[4] }}</td>
+                            <td class="py-2 px-4 border-b">{{ produto[5] }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
