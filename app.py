@@ -1,96 +1,98 @@
-# app.py
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
-from datetime import datetime
-
-app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_aqui'  # troque para algo seguro
-
-# Função para conectar ao banco
-def get_db_connection():
-    conn = sqlite3.connect('painel.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# Cálculo de preço com base em dólar e taxas
-def calcular_preco_final(valor_dolar, taxa_dolar, comissao_importador, comissao_marketplace, imposto, lucro_desejado):
-    comissao_importador /= 100
-    comissao_marketplace /= 100
-    imposto /= 100
-    lucro_desejado /= 100
-
-    custo_base = valor_dolar * taxa_dolar
-    custo_total = custo_base * (1 + comissao_importador)
-    preco_final = custo_total / (1 - comissao_marketplace - imposto - lucro_desejado)
-    lucro_liquido = preco_final - custo_total
-
-    return round(preco_final, 2), round(custo_total, 2), round(lucro_liquido, 2)
-
-# Rota inicial (login)
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        senha = request.form['senha']
-        if usuario == 'admin' and senha == '1234':
-            session['usuario'] = usuario
-            return redirect(url_for('dashboard'))
-        else:
-            return render_template('login.html', erro='Usuário ou senha inválidos.')
-    return render_template('login.html')
-
-# Dashboard principal
-@app.route('/dashboard')
-def dashboard():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    conn = get_db_connection()
-    produtos = conn.execute('SELECT * FROM produtos').fetchall()
-    conn.close()
-    return render_template('dashboard.html', produtos=produtos)
-
-# Rota para adicionar produto manualmente (teste)
-@app.route('/adicionar', methods=['POST'])
-def adicionar():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    sku = request.form['sku']
-    nome = request.form['nome']
-    estoque = request.form['estoque']
-    preco = request.form['preco']
-    preco_custo = request.form['preco_custo']
-    agora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    conn = get_db_connection()
-    conn.execute('INSERT INTO produtos (sku, nome, estoque, preco, preco_custo, ultima_atualizacao) VALUES (?, ?, ?, ?, ?, ?)',
-                 (sku, nome, estoque, preco, preco_custo, agora))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('dashboard'))
-
-# Rota para calculadora de preço
-@app.route('/calculadora', methods=['GET', 'POST'])
-def calculadora():
-    resultado = None
-    if request.method == 'POST':
-        valor_dolar = float(request.form['valor_dolar'])
-        taxa_dolar = float(request.form['taxa_dolar'])
-        comissao_importador = float(request.form['comissao_importador'])
-        comissao_marketplace = float(request.form['comissao_marketplace'])
-        imposto = float(request.form['imposto'])
-        lucro_desejado = float(request.form['lucro_desejado'])
-
-        resultado = calcular_preco_final(valor_dolar, taxa_dolar, comissao_importador, comissao_marketplace, imposto, lucro_desejado)
-
-    return render_template('calculadora.html', resultado=resultado)
-
-# Logout
-@app.route('/logout')
-def logout():
-    session.pop('usuario', None)
-    return redirect(url_for('login'))
-
 import os
 
-if __name__ == "__main__":
+app = Flask(__name__)
+app.secret_key = 'sua_chave_secreta_aqui'  # troque depois para segurança real
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# -------------------- MODELO DE USUÁRIO --------------------
+class User(UserMixin):
+    def __init__(self, id, email, password):
+        self.id = id
+        self.email = email
+        self.password = password
+
+    @staticmethod
+    def get(email):
+        conn = sqlite3.connect('painel.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, email, password FROM users WHERE email = ?", (email,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return User(id=row[0], email=row[1], password=row[2])
+        return None
+
+    @staticmethod
+    def get_by_id(user_id):
+        conn = sqlite3.connect('painel.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, email, password FROM users WHERE id = ?", (user_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return User(id=row[0], email=row[1], password=row[2])
+        return None
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get_by_id(user_id)
+
+# -------------------- ROTAS --------------------
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.get(email)
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect('/dashboard')
+        else:
+            return 'Login falhou. Verifique o email e a senha.'
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/login')
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    conn = sqlite3.connect("painel.db")
+    cursor = conn.cursor()
+    produtos = cursor.execute("SELECT * FROM produtos").fetchall()
+    conn.close()
+    return render_template("dashboard.html", produtos=produtos)
+
+# -------------------- CRIAR USUÁRIO (manual) --------------------
+@app.route('/criar-usuario')
+def criar_usuario():
+    email = "admin@painel.com"
+    senha = generate_password_hash("admin123")
+    conn = sqlite3.connect("painel.db")
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, senha))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        return "Usuário já existe."
+    finally:
+        conn.close()
+    return "Usuário criado com sucesso."
+
+if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
