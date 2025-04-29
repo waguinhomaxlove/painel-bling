@@ -77,6 +77,26 @@ def dashboard():
     conn.close()
     return render_template("dashboard.html", produtos=produtos)
 
+@app.route('/adicionar', methods=['POST'])
+@login_required
+def adicionar():
+    sku = request.form['sku']
+    nome = request.form['nome']
+    estoque = request.form['estoque']
+    preco = request.form['preco']
+    custo = request.form['custo']
+
+    conn = sqlite3.connect("painel.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO produtos (sku, nome, estoque, preco, custo, atualizado_em)
+        VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
+    """, (sku, nome, estoque, preco, custo))
+    conn.commit()
+    conn.close()
+
+    return redirect('/dashboard')
+
 @app.route('/calculadora')
 @login_required
 def calculadora():
