@@ -69,11 +69,17 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    busca = request.args.get('busca', '').strip()
     conn = sqlite3.connect("painel.db")
     cursor = conn.cursor()
-    produtos = cursor.execute("SELECT * FROM produtos").fetchall()
+
+    if busca:
+        produtos = cursor.execute("SELECT * FROM produtos WHERE sku LIKE ? OR nome LIKE ?", (f"%{busca}%", f"%{busca}%")).fetchall()
+    else:
+        produtos = cursor.execute("SELECT * FROM produtos").fetchall()
+
     conn.close()
-    return render_template("dashboard.html", produtos=produtos)
+    return render_template("dashboard.html", produtos=produtos, busca=busca)
 
 @app.route('/adicionar', methods=['POST'])
 @login_required
