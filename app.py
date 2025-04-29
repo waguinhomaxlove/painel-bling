@@ -99,6 +99,14 @@ def editar(sku):
     conn.close()
     return render_template('editar.html', produto=produto)
 
+        @app.route('/excluir/<sku>')
+def excluir(sku):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM produtos WHERE sku = ?', (sku,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard'))
+
 @app.route('/calculadora', methods=['GET', 'POST'])
 def calculadora():
     resultado = None
@@ -180,14 +188,6 @@ def exportar():
     output.headers["Content-Disposition"] = "attachment; filename=produtos.csv"
     output.headers["Content-type"] = "text/csv"
     return output
-
-    @app.route('/excluir/<sku>')
-def excluir(sku):
-    conn = get_db_connection()
-    conn.execute('DELETE FROM produtos WHERE sku = ?', (sku,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
