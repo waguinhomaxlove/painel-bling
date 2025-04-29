@@ -11,20 +11,18 @@ CLIENT_SECRET = os.getenv('ce2bdfe24c2c87a804e7f5386fbd305c83a884c68a3db30823fc3
 REDIRECT_URI = 'https://painel-bling.onrender.com/callback'
 TOKEN_URL = 'https://www.bling.com.br/Api/v3/oauth/token'
 
-
 def get_db_connection():
     conn = sqlite3.connect('painel.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-
 @app.route('/')
 def index():
     return redirect(url_for('login'))
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    erro = None
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
@@ -35,15 +33,13 @@ def login():
             session['usuario'] = email
             return redirect(url_for('dashboard'))
         else:
-            return 'Login falhou. Verifique o email e a senha.'
-    return render_template('login.html')
-
+            erro = 'Login falhou. Verifique o email e a senha.'
+    return render_template('login.html', erro=erro)
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
-
 
 @app.route('/dashboard')
 def dashboard():
@@ -54,6 +50,22 @@ def dashboard():
     conn.close()
     return render_template("dashboard.html", produtos=produtos)
 
+@app.route('/usuarios', methods=['GET', 'POST'])
+def usuarios():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+
+    if request.method == 'POST':
+        email = request.form['email']
+        senha = request.form['senha']
+        conn.execute('INSERT INTO usuarios (email, senha) VALUES (?, ?)', (email, senha))
+        conn.commit()
+
+    usuarios = conn.execute('SELECT id, email FROM usuarios').fetchall()
+    conn.close()
+    return render_template('usuarios.html', usuarios=usuarios)
 
 @app.route('/adicionar', methods=['POST'])
 def adicionar():
@@ -68,7 +80,6 @@ def adicionar():
     conn.commit()
     conn.close()
     return redirect(url_for('dashboard'))
-
 
 @app.route('/calculadora', methods=['GET', 'POST'])
 def calculadora():
@@ -88,12 +99,10 @@ def calculadora():
             resultado = f'Erro no cálculo: {e}'
     return render_template("calculadora.html", resultado=resultado)
 
-
 @app.route('/auth')
 def auth():
     url = f"https://www.bling.com.br/Api/v3/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
     return redirect(url)
-
 
 @app.route('/callback')
 def callback():
@@ -117,7 +126,6 @@ def callback():
         session['bling_token'] = token_data.get('access_token')
         return redirect(url_for('produtos_bling'))
     return "Erro ao obter token Bling."
-
 
 @app.route('/produtos-bling')
 def produtos_bling():
@@ -143,7 +151,6 @@ def produtos_bling():
             })
     return render_template("produtos_bling.html", produtos=produtos)
 
-
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))  # Ajustado para evitar conflitos com 5000
+    port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port, debug=True)
