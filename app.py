@@ -2,9 +2,10 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import requests
 import sqlite3
 import uuid
+import os
 
 app = Flask(__name__)
-app.secret_key = 'chave-secreta'
+app.secret_key = os.environ.get('SECRET_KEY', 'chave-secreta')
 
 CLIENT_ID = 'c0588a73f49371b037d8bb333c059e29406c7850'
 CLIENT_SECRET = 'ce2bdfe24c2c87a804e7f5386fbd305c83a884c68a3db30823fc35c8e4f2'
@@ -129,6 +130,29 @@ def produtos_bling():
         return f"Erro ao processar produtos: {str(e)}"
 
     return render_template("produtos_bling.html", produtos=produtos)
+
+@app.route('/calculadora', methods=['GET', 'POST'])
+def calculadora():
+    if request.method == 'POST':
+        valor_dolar = float(request.form['valor'])
+        cotacao_dolar = 5.90
+        comissao_fornecedor = 0.15
+        impostos = 0.10
+        comissao_marketplace = 0.18
+        lucro_desejado = 0.15
+
+        # Lógica de cálculo aqui
+        valor_reais = valor_dolar * cotacao_dolar
+        valor_com_comissao = valor_reais / (1 - comissao_fornecedor)
+        valor_com_impostos = valor_com_comissao / (1 - impostos)
+        valor_com_marketplace = valor_com_impostos / (1 - comissao_marketplace)
+        preco_venda = valor_com_marketplace / (1 - lucro_desejado)
+
+        resultado_formatado = "{:.2f}".format(preco_venda)  # Formata para 2 casas decimais
+
+        return render_template('calculadora.html', resultado=resultado_formatado)
+    else:
+        return render_template('calculadora.html')
 
 if __name__ == '__main__':
     import os
