@@ -1,8 +1,6 @@
 import os
 import sqlite3
 import requests
-import uuid
-import base64
 from flask import Flask, render_template, request, redirect, session, url_for, make_response
 
 app = Flask(__name__)
@@ -128,53 +126,37 @@ def calculadora():
 
 @app.route('/auth')
 def auth():
-    state = str(uuid.uuid4())
-    session['auth_state'] = state
-    url = (
-        "https://www.bling.com.br/Api/v3/oauth/authorize"
-        f"?response_type=code&client_id={CLIENT_ID}"
-        f"&redirect_uri={REDIRECT_URI}"
-        f"&state={state}"
-    )
+    url = f"https://www.bling.com.br/Api/v3/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
     return redirect(url)
 
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
-    state = request.args.get('state')
-
-    if not code or not state:
-        return "Erro: código de autorização ou estado ausente."
-
-    if state != session.get('auth_state'):
-        return "Erro: parâmetro de estado inválido."
-
-    # Encode client credentials
-    auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    auth_encoded = base64.b64encode(auth_string.encode()).decode()
+    if not code:
+        return "Erro: código de autorização não encontrado."
 
     data = {
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': REDIRECT_URI
+        'redirect_uri': REDIRECT_URI,
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET
     }
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': f'Basic {auth_encoded}'
+        'Content-Type': 'application/x-www-form-urlencoded'
     }
 
     response = requests.post(TOKEN_URL, data=data, headers=headers)
+
+    print("🔁 Resposta do Bling:")
+    print("Status:", response.status_code)
+    print("Body:", response.text)
 
     if response.status_code == 200:
         token_data = response.json()
         session['bling_token'] = token_data.get('access_token')
         return redirect(url_for('produtos_bling'))
-
-    return f"""
-        <h2>Erro ao obter token Bling</h2>
-        <p>Status: {response.status_code}</p>
-        <pre>{response.text}</pre>
-    """
+    return "Erro ao obter token Bling."
 
 @app.route('/produtos-bling')
 def produtos_bling():
@@ -184,7 +166,7 @@ def produtos_bling():
     headers = {
         "Authorization": f"Bearer {token}"
     }
-    response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
+    response = requests.get("https://api.bling.com.br/v3/produtos?expand=produto", headers=headers)
     if response.status_code != 200:
         return "Erro ao buscar produtos do Bling: " + response.text
     data = response.json()
