@@ -6,6 +6,8 @@ import pandas as pd
 from flask import Flask, render_template, request, redirect, session, url_for, make_response
 
 app = Flask(__name__)
+from datetime import timedelta
+app.permanent_session_lifetime = timedelta(days=1)
 app.secret_key = 'chave-secreta'
 
 CLIENT_ID = 'c0588a73f49371b037d8bb333c059e29406c7850'
