@@ -1,3 +1,4 @@
+
 import os
 import sqlite3
 import requests
@@ -20,7 +21,7 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    return redirect(url_for('produtos_bling_calculo'))
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -194,39 +195,32 @@ def produtos_bling():
 
     return render_template("produtos_bling.html", produtos=produtos)
 
-@app.route("/produtos-bling-calculo", methods=["GET", "POST"])
-def produtos_bling_calculo():
+@app.route('/produtos-calculo')
+def produtos_calculo():
     token = session.get('bling_token')
     if not token:
         return redirect(url_for('login'))
 
     headers = { "Authorization": f"Bearer {token}" }
     response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
-    
+
     if response.status_code != 200:
         return f"Erro ao buscar produtos do Bling: {response.status_code} - {response.text}"
 
-    produtos_mock = []  # usaremos produtos_mock para processar a lógica específica da rota
+    data = response.json()
+    produtos = []
 
-    if 'data' in response.json():
-        for item in response.json()['data']:
+    if 'data' in data:
+        for item in data['data']:
             produto = item.get('produto', {})
-            produto_atual = {
-                'sku': produto.get('codigo', ''),
+            produtos.append({
+                'codigo': produto.get('codigo', ''),
                 'nome': produto.get('nome', ''),
-                'preco': produto.get('preco', 0.0),
-                'custo': 0.00,
-                'valor_dolar': 0.00
-            }
-            produtos_mock.append(produto_atual)
+                'estoqueAtual': produto.get('estoqueAtual', 0),
+                'preco': produto.get('preco', 0.0)
+            })
 
-    if request.method == "POST":
-        for produto in produtos_mock:
-            produto["valor_dolar"] = float(request.form.get(f'dolar_{produto["sku"]}', 0))
-            produto["custo"] = round(produto["valor_dolar"] * 5.90, 2)
-        return render_template("produtos_calculo.html", produtos=produtos_mock)
-
-    return render_template("produtos_calculo.html", produtos=produtos_mock)
+    return render_template("produtos_bling_calculo.html", produtos=produtos)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
