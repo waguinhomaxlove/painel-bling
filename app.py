@@ -1,7 +1,8 @@
 import os
 import sqlite3
 import requests
-from flask import Flask, render_template, request, redirect, session, url_for
+import pandas as pd
+from flask import Flask, render_template, request, redirect, session, url_for, make_response
 
 app = Flask(__name__)
 app.secret_key = 'chave-secreta'
@@ -93,7 +94,6 @@ def calculadora():
             imposto = 0.10
             mktplace = 0.18
             lucro = 0.15
-
             custo_total = valor_dolar * dolar * (1 + importador + imposto)
             preco_final = custo_total / (1 - mktplace - lucro)
             resultado = round(preco_final, 2)
@@ -180,6 +180,22 @@ def produtos_calculo():
             })
 
     return render_template("produtos_bling_calculo.html", produtos=produtos)
+
+@app.route('/exportar')
+def exportar():
+    conn = get_db_connection()
+    produtos = conn.execute('SELECT sku, nome, estoque, preco, preco_custo, ultima_atualizacao FROM produtos').fetchall()
+    conn.close()
+
+    dados = [dict(produto) for produto in produtos]
+    df = pd.DataFrame(dados)
+
+    output = df.to_csv(index=False, sep=';', encoding='utf-8-sig')
+    response = make_response(output)
+    response.headers["Content-Disposition"] = "attachment; filename=produtos_exportados.csv"
+    response.headers["Content-type"] = "text/csv; charset=utf-8-sig"
+
+    return response
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
