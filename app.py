@@ -2,10 +2,9 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import requests
 import sqlite3
 import uuid
-import os
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'chave-secreta')
+app.secret_key = 'chave-secreta'
 
 CLIENT_ID = 'c0588a73f49371b037d8bb333c059e29406c7850'
 CLIENT_SECRET = 'ce2bdfe24c2c87a804e7f5386fbd305c83a884c68a3db30823fc35c8e4f2'
@@ -131,30 +130,35 @@ def produtos_bling():
 
     return render_template("produtos_bling.html", produtos=produtos)
 
-@app.route('/calculadora', methods=['GET', 'POST'])
-def calculadora():
-    if request.method == 'POST':
-        valor_dolar = float(request.form['valor'])
-        cotacao_dolar = 5.90
-        comissao_fornecedor = 0.15
-        impostos = 0.10
-        comissao_marketplace = 0.18
-        lucro_desejado = 0.15
-
-        # Lógica de cálculo aqui
-        valor_reais = valor_dolar * cotacao_dolar
-        valor_com_comissao = valor_reais / (1 - comissao_fornecedor)
-        valor_com_impostos = valor_com_comissao / (1 - impostos)
-        valor_com_marketplace = valor_com_impostos / (1 - comissao_marketplace)
-        preco_venda = valor_com_marketplace / (1 - lucro_desejado)
-
-        resultado_formatado = "{:.2f}".format(preco_venda)  # Formata para 2 casas decimais
-
-        return render_template('calculadora.html', resultado=resultado_formatado)
-    else:
-        return render_template('calculadora.html')
-
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 10000))
     app.run(debug=True, host='0.0.0.0', port=port)
+
+
+@app.route('/excluir/<sku>')
+def excluir(sku):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM produtos WHERE sku = ?', (sku,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/editar/<sku>', methods=['GET', 'POST'])
+def editar(sku):
+    conn = get_db_connection()
+    if request.method == 'POST':
+        nome = request.form['nome']
+        estoque = request.form['estoque']
+        preco = request.form['preco']
+        preco_custo = request.form['preco_custo']
+        conn.execute('UPDATE produtos SET nome=?, estoque=?, preco=?, preco_custo=? WHERE sku=?',
+                     (nome, estoque, preco, preco_custo, sku))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('dashboard'))
+
+    produto = conn.execute('SELECT * FROM produtos WHERE sku=?', (sku,)).fetchone()
+    conn.close()
+    return render_template('editar.html', produto=produto)
