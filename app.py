@@ -40,6 +40,20 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+@app.route('/adicionar', methods=['POST'])
+def adicionar():
+    sku = request.form['sku']
+    nome = request.form['nome']
+    estoque = request.form['estoque']
+    preco = request.form['preco']
+    preco_custo = request.form['preco_custo']
+    conn = get_db_connection()
+    conn.execute('INSERT INTO produtos (sku, nome, estoque, preco, preco_custo) VALUES (?, ?, ?, ?, ?)',
+                 (sku, nome, estoque, preco, preco_custo))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard'))
+
 @app.route('/dashboard')
 def dashboard():
     if 'usuario' not in session:
