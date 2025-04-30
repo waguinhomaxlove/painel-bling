@@ -199,36 +199,5 @@ def produtos_bling():
             })
     return render_template("produtos_bling.html", produtos=produtos)
 
-    @app.route('/produtos-calculo', methods=['GET'])
-def produtos_calculo():
-    token = session.get('bling_token')
-    if not token:
-        return redirect(url_for('login'))
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-    response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
-
-    if response.status_code != 200:
-        return f"Erro ao buscar produtos do Bling: {response.status_code} - {response.text}"
-
-    data = response.json()
-    produtos = []
-
-    if 'data' in data:
-        for item in data['data']:
-            produto = item.get('produto', {})
-            produtos.append({
-                'codigo': produto.get('codigo', ''),
-                'nome': produto.get('nome', ''),
-                'estoqueAtual': produto.get('estoqueAtual', 0),
-                'preco': produto.get('preco', 0.0)
-            })
-
-    return render_template("produtos_bling_calculo.html", produtos=produtos)
-
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+port = int(os.environ.get('PORT', 10000))
+app.run(debug=True, host='0.0.0.0', port=port)
