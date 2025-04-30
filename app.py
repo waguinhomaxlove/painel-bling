@@ -2,6 +2,7 @@ import os
 import sqlite3
 import requests
 import uuid
+import base64
 from flask import Flask, render_template, request, redirect, session, url_for, make_response
 
 app = Flask(__name__)
@@ -148,60 +149,56 @@ def callback():
     if state != session.get('auth_state'):
         return "Erro: parâmetro de estado inválido."
 
+    # Encode client credentials
+    auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
+    auth_encoded = base64.b64encode(auth_string.encode()).decode()
+
     data = {
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': REDIRECT_URI,
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET
+        'redirect_uri': REDIRECT_URI
     }
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': f'Basic {auth_encoded}'
     }
 
-    try:
-        response = requests.post(TOKEN_URL, data=data, headers=headers)
-        response.raise_for_status()  # Vai gerar uma exceção para erros de status HTTP 4xx ou 5xx
+    response = requests.post(TOKEN_URL, data=data, headers=headers)
 
+    if response.status_code == 200:
         token_data = response.json()
         session['bling_token'] = token_data.get('access_token')
         return redirect(url_for('produtos_bling'))
 
-    except requests.exceptions.RequestException as e:
-        return f"Erro ao obter o token Bling: {str(e)}"
+    return f"""
+        <h2>Erro ao obter token Bling</h2>
+        <p>Status: {response.status_code}</p>
+        <pre>{response.text}</pre>
+    """
 
 @app.route('/produtos-bling')
 def produtos_bling():
     token = session.get('bling_token')
     if not token:
         return redirect(url_for('auth'))
-
     headers = {
         "Authorization": f"Bearer {token}"
     }
-
     response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
-
     if response.status_code != 200:
-        # Tratamento de erro de status
-        return f"Erro ao buscar produtos do Bling: Status Code {response.status_code} - {response.text}"
-
-    try:
-        data = response.json()
-        produtos = []
-        if 'data' in data:
-            for item in data['data']:
-                produto = item.get('produto', {})
-                produtos.append({
-                    'codigo': produto.get('codigo', ''),
-                    'nome': produto.get('nome', ''),
-                    'estoqueAtual': produto.get('estoqueAtual', 0),
-                    'preco': produto.get('preco', '0.00')
-                })
-        return render_template("produtos_bling.html", produtos=produtos)
-
-    except ValueError:
-        return "Erro: resposta inválida ao tentar decodificar JSON da API do Bling."
+        return "Erro ao buscar produtos do Bling: " + response.text
+    data = response.json()
+    produtos = []
+    if 'data' in data:
+        for item in data['data']:
+            produto = item.get('produto', {})
+            produtos.append({
+                'codigo': produto.get('codigo', ''),
+                'nome': produto.get('nome', ''),
+                'estoqueAtual': produto.get('estoqueAtual', 0),
+                'preco': produto.get('preco', '0.00')
+            })
+    return render_template("produtos_bling.html", produtos=produtos)
 
 @app.route('/exportar')
 def exportar():
