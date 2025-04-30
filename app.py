@@ -31,6 +31,7 @@ def login():
         conn.close()
         if user:
             session['usuario'] = email
+            session.permanent = True
             return redirect(url_for('dashboard'))
         else:
             return render_template("login.html", erro="Login falhou. Verifique o email e a senha.")
