@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
-    <div class="max-w-xl mx-auto bg-white shadow-md rounded-lg p-6">
+    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
         <h1 class="text-2xl font-bold text-green-700 mb-4">🔢 Calculadora de Preço Final</h1>
         <form method="POST" class="flex flex-col gap-4">
             <input type="number" name="valor_dolar" step="any" placeholder="Valor pago em dólar" required class="border border-gray-300 p-2 rounded">
@@ -17,9 +17,17 @@
         </form>
 
         {% if resultado %}
-            <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-                <strong>Preço de venda sugerido:</strong><br> R$ {{ resultado }}
-            </div>
+        <div class="mt-6 p-4 bg-gray-100 border rounded-md text-gray-800 leading-relaxed">
+            <p>💵 <strong>Valor pago em dólar:</strong> US$ {{ detalhes.valor_dolar }}</p>
+            <p>💱 <strong>Dólar convertido:</strong> R$ {{ detalhes.valor_convertido }}</p>
+            <p>🧾 <strong>Impostos:</strong> {{ detalhes.imposto * 100 }}%</p>
+            <p>🤝 <strong>Comissão do fornecedor:</strong> {{ detalhes.importador * 100 }}%</p>
+            <p>🛒 <strong>Comissão do marketplace:</strong> {{ detalhes.marketplace * 100 }}%</p>
+            <p>💰 <strong>Lucro desejado:</strong> {{ detalhes.lucro * 100 }}%</p>
+            <hr class="my-2">
+            <p>📦 <strong>Preço de custo total:</strong> R$ {{ detalhes.custo_total }}</p>
+            <p>💸 <strong>Preço de venda sugerido:</strong> <span class="text-green-700 font-bold">R$ {{ resultado }}</span></p>
+        </div>
         {% endif %}
     </div>
 </body>
