@@ -146,28 +146,28 @@ def callback():
         "clientid": CLIENTID,
         "clientsecret": CLIENTSECRET
     }
-    response = requests.post(tokenurl, data=data)  # Removido auth
+    response = requests.post(tokenurl, data=data)
     if response.statuscode == 200:
         accesstoken = response.json().get("accesstoken")
         session['blingtoken'] = accesstoken
-        print("Token obtido:", accesstoken)  # Debug
+        print("Token obtido:", accesstoken)
         return redirect(urlfor('dashboard'))
     else:
-        print("Erro ao obter token Bling:", response.text)  # Debug
+        print("Erro ao obter token Bling:", response.text)
         return f"Erro ao obter token Bling.<br><br>Status: {response.statuscode}<br><br>{response.text}"
 @app.route('/produtos-bling')
 def produtosbling():
     token = session.get('blingtoken')
-    print("Token na sessão:", token)  # Debug
+    print("Token na sessão:", token)
 if not token:
     return redirect(url_for('login'))
 
 headers = { "Authorization": f"Bearer {token}" }
 response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
 
-print("Código de status da resposta:", response.status_code)  # Debug
+print("Código de status da resposta:", response.status_code)
 if response.status_code != 200:
-    print("Erro na resposta do Bling:", response.text)  # Debug
+    print("Erro na resposta do Bling:", response.text)
     return f"Erro ao buscar produtos do Bling: {response.status_code} - {response.text}"
 
 data = response.json()
