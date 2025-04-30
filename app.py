@@ -1,4 +1,3 @@
-
 import os
 import sqlite3
 import requests
@@ -45,6 +44,25 @@ def dashboard():
     conn.close()
     return render_template("dashboard.html", produtos=produtos)
 
+@app.route('/calculadora', methods=['GET', 'POST'])
+def calculadora():
+    resultado = None
+    if request.method == 'POST':
+        try:
+            valor_dolar = float(request.form['valor_dolar'])
+            dolar = 5.90
+            importador = 0.15
+            imposto = 0.10
+            mktplace = 0.18
+            lucro = 0.15
+
+            custo_total = valor_dolar * dolar * (1 + importador + imposto)
+            preco_final = custo_total / (1 - mktplace - lucro)
+            resultado = round(preco_final, 2)
+        except:
+            resultado = 'Erro no cálculo'
+    return render_template("calculadora.html", resultado=resultado)
+
 @app.route('/produtos-calculo', methods=['GET'])
 def produtos_calculo():
     token = session.get('bling_token')
@@ -75,4 +93,5 @@ def produtos_calculo():
     return render_template("produtos_bling_calculo.html", produtos=produtos)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=10000, debug=True)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(debug=True, host='0.0.0.0', port=port)
