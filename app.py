@@ -169,7 +169,7 @@ def callback():
 def produtos_bling():
     token = session.get('bling_token')
     if not token:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth'))
 
     headers = { "Authorization": f"Bearer {token}" }
     response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
@@ -196,7 +196,7 @@ def produtos_bling():
 def produtos_calculo():
     token = session.get('bling_token')
     if not token:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth'))
 
     headers = { "Authorization": f"Bearer {token}" }
     response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
