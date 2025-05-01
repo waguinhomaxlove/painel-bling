@@ -42,6 +42,39 @@ def login():
             return render_template('login.html', erro='Login falhou.')
     return render_template('login.html')
 
+    @app.route('/produtos-calculo', methods=['GET'])
+def produtos_calculo():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    token = session.get('bling_token')
+    if not token:
+        return redirect(url_for('login'))
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.get("https://api.bling.com.br/v3/produtos", headers=headers)
+    if response.status_code != 200:
+        return f"Erro ao buscar produtos do Bling: {response.text}", 400
+
+    data = response.json()
+    produtos = []
+
+    if 'data' in data:
+        for item in data['data']:
+            produto = item.get('produto', {})
+            produtos.append({
+                'sku': produto.get('codigo', ''),
+                'nome': produto.get('nome', ''),
+                'estoque': produto.get('estoqueAtual', 0),
+                'preco': produto.get('preco', '0.00')
+            })
+
+    return render_template("produtos_bling_calculo.html", produtos=produtos)
+
+
 @app.route('/logout')
 def logout():
     session.clear()
