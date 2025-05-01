@@ -1,9 +1,49 @@
-
-<!-- Simulação de calculadora.html -->
 <!DOCTYPE html>
-<html>
-<head><title>Calculadora</title></head>
-<body>
-    <h1>Calculadora de Preço</h1>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Preço de Venda</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-xl">
+        <h1 class="text-2xl font-bold text-green-700 mb-6 text-center">Calculadora de Preço de Venda</h1>
+        <form method="POST" class="mb-6">
+            <input type="text" name="valor_dolar" placeholder="Valor pago em dólar"
+                class="w-full p-3 border border-gray-300 rounded mb-4" required>
+            <button type="submit"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded">Calcular</button>
+        </form>
+
+        {% if resultado %}
+        <div class="bg-green-100 border border-green-400 text-green-800 p-4 rounded mb-4 text-center">
+            <p class="font-semibold">Valor sugerido de venda:</p>
+            <p class="text-2xl font-bold">R$ {{ resultado }}</p>
+        </div>
+        {% elif resultado == 'Erro no cálculo' %}
+        <div class="bg-red-100 border border-red-400 text-red-800 p-4 rounded mb-4 text-center">
+            <p class="font-semibold">Erro no cálculo. Verifique o valor digitado.</p>
+        </div>
+        {% endif %}
+
+        {% if detalhes %}
+        <div class="mt-4 text-sm text-gray-700">
+            <h2 class="font-bold mb-2">Detalhamento do cálculo:</h2>
+            <ul class="list-disc pl-5">
+                <li>Cotação do dólar: R$ {{ detalhes.dolar }}</li>
+                <li>Comissão do fornecedor: {{ detalhes.importador * 100 }}%</li>
+                <li>Impostos: {{ detalhes.imposto * 100 }}%</li>
+                <li>Comissão do marketplace: {{ detalhes.mktplace * 100 }}%</li>
+                <li>Lucro líquido desejado: {{ detalhes.lucro * 100 }}%</li>
+                <li class="mt-2 font-semibold">Custo total: R$ {{ detalhes.custo_total }}</li>
+                <li>Preço final calculado: R$ {{ detalhes.preco_final }}</li>
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="mt-6 text-center">
+            <a href="{{ url_for('dashboard') }}" class="text-green-700 hover:underline font-semibold">← Voltar para Dashboard</a>
+        </div>
+    </div>
 </body>
 </html>
