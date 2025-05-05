@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Respostas Prontas - Robô Hardware</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; max-width: 800px; margin: auto; }
+    input, select, button { font-size: 16px; padding: 8px; margin-top: 10px; width: 100%; }
+    textarea { width: 100%; height: 250px; margin-top: 20px; font-size: 16px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Gerador de Respostas - Robô Hardware LTDA</h2>
+  <form method="post">
+    <label for="resposta">Escolha o modelo de resposta:</label>
+    <select name="resposta" id="resposta">
+      <option value="1">Resposta 1 – Pedido no prazo</option>
+      <option value="1e">Resposta 1 – Entregue</option>
+      <option value="2">Resposta 2 – Entregue (curta)</option>
+      <option value="3">Resposta 3 – Atraso em verificação</option>
+      <option value="4">Resposta 4 – Produto com defeito</option>
+      <option value="5">Resposta 5 – Produto extraviado</option>
+      <option value="6">Resposta 6 – Número não localizado</option>
+    </select>
+
+    <label for="codigo">Código de rastreio ou devolução:</label>
+    <input type="text" name="codigo" id="codigo" placeholder="Ex: TXAS523384246tx ou AM387888418BR" required>
+
+    <button type="submit">Gerar Resposta</button>
+  </form>
+
+  {% if texto %}
+    <h3>Resposta Gerada:</h3>
+    <textarea readonly>{{ texto }}</textarea>
+  {% endif %}
+</body>
+</html>
