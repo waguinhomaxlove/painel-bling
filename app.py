@@ -11,7 +11,6 @@ def index():
 def login():
     erro = None
     if request.method == 'POST':
-        # Aqui você pode colocar a lógica de autenticação
         email = request.form['email']
         senha = request.form['senha']
         if email == "admin" and senha == "123":
@@ -23,7 +22,7 @@ def login():
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     busca = request.args.get('busca', '')
-    produtos = []  # Preencha com dados do banco se necessário
+    produtos = []  # Preencha com dados reais
     return render_template('dashboard.html', busca=busca, produtos=produtos)
 
 @app.route('/usuarios', methods=['GET', 'POST'])
@@ -57,7 +56,7 @@ def respostas():
             texto = f"""Olá! Tudo bem?\n\nVerificamos que o seu pedido foi enviado corretamente, porém o número indicado pela transportadora {transportadora} não foi localizado para a entrega.\n\nCódigo de rastreio: {codigo}\nRastreamento: {link}\n\nNeste caso, você pode optar por cancelamento com estorno ou reenvio do produto com os dados de endereço revisados.\nPor favor, nos informe sua preferência para seguirmos com o atendimento.\n\nAtenciosamente,\nEquipe Robô Hardware LTDA"""
     return render_template("respostas.html", texto=texto)
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/calculadora', methods=['GET', 'POST'])
 def calculadora():
     resultado = None
     detalhes = None
@@ -65,22 +64,20 @@ def calculadora():
     if request.method == 'POST':
         try:
             valor_dolar = float(request.form['valor_dolar'].replace(',', '.'))
-            dolar = 5.90  # cotação fixa
-            importador = 0.15  # comissão do fornecedor
-            imposto = 0.10  # imposto sobre a venda
-            mktplace = 0.21  # comissão marketplace
-            lucro = 0.15  # lucro líquido desejado
+            dolar = 5.90
+            importador = 0.15
+            imposto = 0.10
+            mktplace = 0.21
+            lucro = 0.15
 
-            # cálculo do custo em reais com comissão do fornecedor
             custo_base = valor_dolar * dolar
             custo_importador = custo_base * importador
             custo_fixo_unitario = 5.00
 
-            # cálculo da parcela das despesas fixas (por unidade vendida)
-            faturamento_estimado = 120000  # Exemplo de faturamento mensal
+            faturamento_estimado = 120000
             despesas_fixas = 3000.00
-            proporcao_despesas = despesas_fixas / faturamento_estimado  # ex: 0.025 = 2,5%
-            
+            proporcao_despesas = despesas_fixas / faturamento_estimado
+
             custo_total = custo_base + custo_importador + custo_fixo_unitario
             preco_final = custo_total / (1 - imposto - mktplace - lucro - proporcao_despesas)
 
@@ -99,7 +96,6 @@ def calculadora():
 
     return render_template('calculadora.html', resultado=resultado, detalhes=detalhes)
 
-
 @app.route('/editar/<sku>', methods=['GET', 'POST'])
 def editar(sku):
     produto = [sku, 'Nome do Produto', 10, 199.90, 150.00]
@@ -107,22 +103,22 @@ def editar(sku):
 
 @app.route('/produtos_bling')
 def produtos_bling():
-    produtos = []  # Simulado
+    produtos = []
     return render_template('produtos_bling.html', produtos=produtos)
 
 @app.route('/produtos_bling_calculo')
 def produtos_bling_calculo():
-    produtos = []  # Simulado
+    produtos = []
     return render_template('produtos_bling_calculo.html', produtos=produtos)
 
 @app.route('/produtos_calculo', methods=['GET', 'POST'])
 def produtos_calculo():
-    produtos = []  # Simulado
+    produtos = []
     return render_template('produtos_calculo.html', produtos=produtos)
 
 @app.route('/produtos-bling')
 def produtos_bling_2():
-    produtos = []  # Simulado
+    produtos = []
     return render_template('produtos-bling.html', produtos=produtos)
 
 @app.route('/logout')
@@ -141,7 +137,6 @@ def adicionar():
 def excluir(sku):
     return redirect(url_for('dashboard'))
 
-# Inicialização da aplicação
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
