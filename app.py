@@ -1,115 +1,132 @@
-
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
+import os
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "Sistema ativo. Acesse /respostas para gerar respostas automáticas."
+    return redirect(url_for('login'))
 
-@app.route("/respostas", methods=["GET", "POST"])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    erro = None
+    if request.method == 'POST':
+        # Aqui você pode colocar a lógica de autenticação
+        email = request.form['email']
+        senha = request.form['senha']
+        if email == "admin" and senha == "123":
+            return redirect(url_for('dashboard'))
+        else:
+            erro = "E-mail ou senha inválidos"
+    return render_template('login.html', erro=erro)
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    busca = request.args.get('busca', '')
+    produtos = []  # Preencha com dados do banco se necessário
+    return render_template('dashboard.html', busca=busca, produtos=produtos)
+
+@app.route('/usuarios', methods=['GET', 'POST'])
+def usuarios():
+    usuarios = []  # Preencha com dados reais
+    return render_template('usuarios.html', usuarios=usuarios)
+
+@app.route('/respostas', methods=["GET", "POST"])
 def respostas():
     texto = ""
     if request.method == "POST":
         codigo = request.form["codigo"]
         tipo = request.form["resposta"]
-
-        # Detectar transportadora e link
         if codigo.lower().startswith("txas"):
             link = f"https://totalconecta.totalexpress.com.br/rastreamento/?codigo={codigo}"
             transportadora = "Total Express"
         else:
             link = f"https://www2.correios.com.br/sistemas/rastreamento/default.cfm?objetos={codigo}"
             transportadora = "Correios"
-
         if tipo == "1":
-            texto = f"""Olá! Tudo bem?
-
-Verificamos aqui que o seu pedido está dentro do prazo estimado de entrega e segue em trânsito normalmente com a transportadora {transportadora}.
-
-Você pode acompanhar o andamento da entrega no link abaixo:
-Código de rastreio: {codigo}
-Rastreamento: {link}
-
-Ficamos à disposição para qualquer dúvida ou suporte adicional.
-Agradecemos pela sua paciência e preferência!
-
-Atenciosamente,
-Equipe Robô Hardware LTDA"""
+            texto = f"""Olá! Tudo bem?\n\nVerificamos aqui que o seu pedido está dentro do prazo estimado de entrega e segue em trânsito normalmente com a transportadora {transportadora}.\n\nVocê pode acompanhar o andamento da entrega no link abaixo:\nCódigo de rastreio: {codigo}\nRastreamento: {link}\n\nFicamos à disposição para qualquer dúvida ou suporte adicional.\nAgradecemos pela sua paciência e preferência!\n\nAtenciosamente,\nEquipe Robô Hardware LTDA"""
         elif tipo in ["1e", "2"]:
-            texto = f"""Olá! Tudo certo?
-
-Conforme verificação no sistema da transportadora {transportadora}, o seu pedido foi entregue com sucesso.
-
-Código de rastreio: {codigo}
-Rastreamento: {link}
-
-Caso ainda não tenha localizado o pacote, sugerimos verificar com moradores, porteiros ou recepção.
-Qualquer dúvida, estamos à disposição!
-
-Atenciosamente,
-Equipe Robô Hardware LTDA"""
+            texto = f"""Olá! Tudo certo?\n\nConforme verificação no sistema da transportadora {transportadora}, o seu pedido foi entregue com sucesso.\n\nCódigo de rastreio: {codigo}\nRastreamento: {link}\n\nCaso ainda não tenha localizado o pacote, sugerimos verificar com moradores, porteiros ou recepção.\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe Robô Hardware LTDA"""
         elif tipo == "3":
-            texto = f"""Olá! Tudo bem?
-
-Verificamos que seu pedido está com atraso na entrega.
-Já estamos abrindo uma solicitação junto à transportadora {transportadora} para apurar o ocorrido.
-
-Código de rastreio: {codigo}
-Rastreamento: {link}
-
-Nos comprometemos a retornar com uma posição em até 48 horas úteis.
-Agradecemos pela compreensão e paciência.
-
-Atenciosamente,
-Equipe Robô Hardware LTDA"""
+            texto = f"""Olá! Tudo bem?\n\nVerificamos que seu pedido está com atraso na entrega.\nJá estamos abrindo uma solicitação junto à transportadora {transportadora} para apurar o ocorrido.\n\nCódigo de rastreio: {codigo}\nRastreamento: {link}\n\nNos comprometemos a retornar com uma posição em até 48 horas úteis.\nAgradecemos pela compreensão e paciência.\n\nAtenciosamente,\nEquipe Robô Hardware LTDA"""
         elif tipo == "4":
-            texto = f"""Olá! Tudo bem?
-
-Sentimos muito pelo transtorno com o seu produto.
-Em casos como esse, você pode optar por troca ou cancelamento, conforme sua preferência.
-
-Já emitimos um código de postagem reversa para devolução gratuita pelos Correios:
-Código de devolução: {codigo}
-
-Você tem até 10 dias corridos para realizar o envio a partir da data de hoje.
-Assim que o produto retornar e for conferido, daremos sequência à troca ou reembolso.
-
-Ficamos à disposição para qualquer dúvida ou assistência.
-
-Atenciosamente,
-Equipe Robô Hardware LTDA"""
+            texto = f"""Olá! Tudo bem?\n\nSentimos muito pelo transtorno com o seu produto.\nEm casos como esse, você pode optar por troca ou cancelamento, conforme sua preferência.\n\nJá emitimos um código de postagem reversa para devolução gratuita pelos Correios:\nCódigo de devolução: {codigo}\n\nVocê tem até 10 dias corridos para realizar o envio a partir da data de hoje.\nAssim que o produto retornar e for conferido, daremos sequência à troca ou reembolso.\n\nFicamos à disposição para qualquer dúvida ou assistência.\n\nAtenciosamente,\nEquipe Robô Hardware LTDA"""
         elif tipo == "5":
-            texto = f"""Olá! Tudo bem?
-
-Lamentamos o transtorno. Verificamos que o seu pedido foi considerado extraviado pela transportadora {transportadora}.
-
-Diante disso, já iniciamos o processo de cancelamento e estorno conforme o método de pagamento utilizado.
-
-Caso necessário, segue o código de devolução para qualquer conferência adicional:
-Código de devolução: {codigo}
-
-Ficamos à disposição para qualquer dúvida ou suporte adicional.
-
-Atenciosamente,
-Equipe Robô Hardware LTDA"""
+            texto = f"""Olá! Tudo bem?\n\nLamentamos o transtorno. Verificamos que o seu pedido foi considerado extraviado pela transportadora {transportadora}.\n\nDiante disso, já iniciamos o processo de cancelamento e estorno conforme o método de pagamento utilizado.\n\nCaso necessário, segue o código de devolução para qualquer conferência adicional:\nCódigo de devolução: {codigo}\n\nFicamos à disposição para qualquer dúvida ou suporte adicional.\n\nAtenciosamente,\nEquipe Robô Hardware LTDA"""
         elif tipo == "6":
-            texto = f"""Olá! Tudo bem?
-
-Verificamos que o seu pedido foi enviado corretamente, porém o número indicado pela transportadora {transportadora} não foi localizado para a entrega.
-
-Código de rastreio: {codigo}
-Rastreamento: {link}
-
-Neste caso, você pode optar por cancelamento com estorno ou reenvio do produto com os dados de endereço revisados.
-Por favor, nos informe sua preferência para seguirmos com o atendimento.
-
-Atenciosamente,
-Equipe Robô Hardware LTDA"""
-
+            texto = f"""Olá! Tudo bem?\n\nVerificamos que o seu pedido foi enviado corretamente, porém o número indicado pela transportadora {transportadora} não foi localizado para a entrega.\n\nCódigo de rastreio: {codigo}\nRastreamento: {link}\n\nNeste caso, você pode optar por cancelamento com estorno ou reenvio do produto com os dados de endereço revisados.\nPor favor, nos informe sua preferência para seguirmos com o atendimento.\n\nAtenciosamente,\nEquipe Robô Hardware LTDA"""
     return render_template("respostas.html", texto=texto)
 
+@app.route('/calculadora', methods=['GET', 'POST'])
+def calculadora():
+    resultado = None
+    detalhes = None
+    if request.method == 'POST':
+        try:
+            valor_dolar = float(request.form['valor_dolar'])
+            dolar = 5.90
+            importador = 0.15
+            imposto = 0.10
+            mktplace = 0.21
+            lucro = 0.15
+            custo_br = valor_dolar * dolar * (1 + importador)
+            preco_final = custo_br / (1 - mktplace - lucro)
+            resultado = round(preco_final, 2)
+            detalhes = {
+                'dolar': dolar,
+                'importador': importador,
+                'imposto': imposto,
+                'mktplace': mktplace,
+                'lucro': lucro,
+                'custo_total': round(custo_br, 2),
+                'preco_final': resultado
+            }
+        except:
+            resultado = 'Erro no cálculo'
+    return render_template('calculadora.html', resultado=resultado, detalhes=detalhes)
+
+@app.route('/editar/<sku>', methods=['GET', 'POST'])
+def editar(sku):
+    produto = [sku, 'Nome do Produto', 10, 199.90, 150.00]
+    return render_template('editar.html', produto=produto)
+
+@app.route('/produtos_bling')
+def produtos_bling():
+    produtos = []  # Simulado
+    return render_template('produtos_bling.html', produtos=produtos)
+
+@app.route('/produtos_bling_calculo')
+def produtos_bling_calculo():
+    produtos = []  # Simulado
+    return render_template('produtos_bling_calculo.html', produtos=produtos)
+
+@app.route('/produtos_calculo', methods=['GET', 'POST'])
+def produtos_calculo():
+    produtos = []  # Simulado
+    return render_template('produtos_calculo.html', produtos=produtos)
+
+@app.route('/produtos-bling')
+def produtos_bling_2():
+    produtos = []  # Simulado
+    return render_template('produtos-bling.html', produtos=produtos)
+
+@app.route('/logout')
+def logout():
+    return redirect(url_for('login'))
+
+@app.route('/exportar')
+def exportar():
+    return "Função de exportação ainda não implementada."
+
+@app.route('/adicionar', methods=['POST'])
+def adicionar():
+    return redirect(url_for('dashboard'))
+
+@app.route('/excluir/<sku>')
+def excluir(sku):
+    return redirect(url_for('dashboard'))
+
+# Inicialização da aplicação
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
