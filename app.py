@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import os
+from datetime import datetime
 
 app = Flask(__name__)
+
+romaneios = []
 
 @app.route('/')
 def index():
@@ -121,25 +124,6 @@ def produtos_bling_2():
     produtos = []
     return render_template('produtos-bling.html', produtos=produtos)
 
-@app.route('/logout')
-def logout():
-    return redirect(url_for('login'))
-
-@app.route('/exportar')
-def exportar():
-    return "Função de exportação ainda não implementada."
-
-@app.route('/adicionar', methods=['POST'])
-def adicionar():
-    return redirect(url_for('dashboard'))
-
-@app.route('/excluir/<sku>')
-def excluir(sku):
-    return redirect(url_for('dashboard'))
-    from flask import session
-
-romaneios = []
-
 @app.route('/romaneio_form', methods=['GET', 'POST'])
 def romaneio_form():
     global romaneios
@@ -159,11 +143,25 @@ def romaneio_form():
 @app.route('/romaneio_gerado')
 def romaneio_gerado():
     global romaneios
-    from datetime import datetime
     data_atual = datetime.now().strftime('%d/%m/%Y')
     total = sum([int(r['quantidade']) for r in romaneios])
     return render_template('romaneio_gerado.html', romaneios=romaneios, data=data_atual, total=total)
 
+@app.route('/logout')
+def logout():
+    return redirect(url_for('login'))
+
+@app.route('/exportar')
+def exportar():
+    return "Função de exportação ainda não implementada."
+
+@app.route('/adicionar', methods=['POST'])
+def adicionar():
+    return redirect(url_for('dashboard'))
+
+@app.route('/excluir/<sku>')
+def excluir(sku):
+    return redirect(url_for('dashboard'))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
