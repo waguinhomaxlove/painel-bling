@@ -1,6 +1,8 @@
+
 from flask import Flask, render_template, request, session
 from xml.etree import ElementTree as ET
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.secret_key = 'segredo123'
@@ -47,4 +49,4 @@ def romaneio_gerado_post():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port)
