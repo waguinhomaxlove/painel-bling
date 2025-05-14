@@ -1,5 +1,1 @@
-flask
-flask-login
-werkzeug
-pandas
-requests
+Flask
