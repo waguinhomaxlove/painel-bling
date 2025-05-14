@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Romaneio de Coleta</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table, th, td { border: 1px solid black; border-collapse: collapse; }
+        th, td { padding: 8px; }
+    </style>
+</head>
+<body>
+    <h2>Romaneio de Coleta - Transportadora: Total Express</h2>
+    <p>Data: {{ data }}</p>
+    <table>
+        <tr>
+            <th>Nome do Cliente</th>
+            <th>Nota Fiscal</th>
+            <th>Código de Rastreio</th>
+            <th>Quantidade</th>
+        </tr>
+        {% for r in romaneios %}
+        <tr>
+            <td>{{ r.nome }}</td>
+            <td>{{ r.nota }}</td>
+            <td>{{ r.rastreio }}</td>
+            <td>{{ r.quantidade }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <p><strong>Total Coletado:</strong> {{ total }}</p>
+    <br><br><br>
+    <p>Assinatura do Motorista: _____________________________</p>
+</body>
+</html>

@@ -136,6 +136,34 @@ def adicionar():
 @app.route('/excluir/<sku>')
 def excluir(sku):
     return redirect(url_for('dashboard'))
+    from flask import session
+
+romaneios = []
+
+@app.route('/romaneio_form', methods=['GET', 'POST'])
+def romaneio_form():
+    global romaneios
+    if request.method == 'POST':
+        nome = request.form['nome']
+        nota = request.form['nota']
+        rastreio = request.form['rastreio']
+        quantidade = int(request.form.get('quantidade', 1))
+        romaneios.append({
+            'nome': nome,
+            'nota': nota,
+            'rastreio': rastreio,
+            'quantidade': quantidade
+        })
+    return render_template('romaneio_form.html', romaneios=romaneios)
+
+@app.route('/romaneio_gerado')
+def romaneio_gerado():
+    global romaneios
+    from datetime import datetime
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+    total = sum([int(r['quantidade']) for r in romaneios])
+    return render_template('romaneio_gerado.html', romaneios=romaneios, data=data_atual, total=total)
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
