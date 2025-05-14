@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Importar XML - Romaneio</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f3f3f3; }
+        h2 { color: #00cc66; }
+        form { background: #111; padding: 20px; border-radius: 10px; color: #00cc66; }
+        input[type="file"] { margin-bottom: 10px; }
+        button {
+            background-color: #00cc66;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Importar XMLs das Notas Fiscais</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Selecione os arquivos XML:</label><br><br>
+        <input type="file" name="xmlfiles" multiple required><br><br>
+        <button type="submit">Enviar e Preencher Rastreios</button>
+    </form>
+</body>
+</html>
