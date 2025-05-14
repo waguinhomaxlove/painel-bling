@@ -1,20 +1,48 @@
 <!DOCTYPE html>
-<html><head><title>Preencher Rastreios</title></head>
+<html>
+<head>
+    <title>Preencher Rastreios - Romaneio</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f3f3f3; }
+        h2 { color: #00cc66; }
+        form { background: #111; padding: 20px; border-radius: 10px; color: #00cc66; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #00cc66; color: white; }
+        input[type="text"] { width: 95%; padding: 6px; }
+        button {
+            margin-top: 20px;
+            background-color: #00cc66;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
 <body>
     <h2>Preencha os códigos de rastreio</h2>
     <form method="POST" action="/romaneio_gerado">
-        <table border="1">
-            <tr><th>Nome</th><th>Nota</th><th>Quantidade</th><th>Rastreio</th></tr>
-            {% for i, item in enumerate(romaneios) %}
+        <table>
             <tr>
-                <td><input type="hidden" name="nome_{{i}}" value="{{item.nome}}">{{item.nome}}</td>
-                <td><input type="hidden" name="nota_{{i}}" value="{{item.nota}}">{{item.nota}}</td>
-                <td><input type="hidden" name="quantidade_{{i}}" value="{{item.quantidade}}">{{item.quantidade}}</td>
-                <td><input type="text" name="rastreio_{{i}}" required></td>
+                <th>Nome do Cliente</th>
+                <th>Nota Fiscal</th>
+                <th>Quantidade</th>
+                <th>Código de Rastreio</th>
+            </tr>
+            {% for item in romaneios %}
+            <tr>
+                <td><input type="hidden" name="nome_{{ loop.index0 }}" value="{{ item.nome }}">{{ item.nome }}</td>
+                <td><input type="hidden" name="nota_{{ loop.index0 }}" value="{{ item.nota }}">{{ item.nota }}</td>
+                <td><input type="hidden" name="quantidade_{{ loop.index0 }}" value="{{ item.quantidade }}">{{ item.quantidade }}</td>
+                <td><input type="text" name="rastreio_{{ loop.index0 }}" required></td>
             </tr>
             {% endfor %}
         </table>
-        <input type="hidden" name="total_linhas" value="{{romaneios|length}}">
+        <input type="hidden" name="total_linhas" value="{{ romaneios|length }}">
         <button type="submit">Gerar Romaneio</button>
     </form>
-</body></html>
+</body>
+</html>
