@@ -124,28 +124,39 @@ def produtos_bling_2():
     produtos = []
     return render_template('produtos-bling.html', produtos=produtos)
 
-@app.route('/romaneio_form', methods=['GET', 'POST'])
-def romaneio_form():
-    global romaneios
-    if request.method == 'POST':
-        nome = request.form['nome']
-        nota = request.form['nota']
-        rastreio = request.form['rastreio']
-        quantidade = int(request.form.get('quantidade', 1))
-        romaneios.append({
-            'nome': nome,
-            'nota': nota,
-            'rastreio': rastreio,
-            'quantidade': quantidade
-        })
-    return render_template('romaneio_form.html', romaneios=romaneios)
+from xml.etree import ElementTree as ET
 
-@app.route('/romaneio_gerado')
-def romaneio_gerado():
-    global romaneios
+@app.route('/romaneio_xml', methods=['GET', 'POST'])
+def romaneio_xml():
+    if request.method == 'POST':
+        uploaded_files = request.files.getlist("xmlfiles")
+        session['romaneios'] = []
+        for f in uploaded_files:
+            tree = ET.parse(f)
+            root = tree.getroot()
+            ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'}
+            nome = root.find('.//ns:dest/ns:xNome', ns).text
+            nota = root.find('.//ns:ide/ns:nNF', ns).text
+            qtd_el = root.find('.//ns:vol/ns:qVol', ns)
+            quantidade = int(float(qtd_el.text)) if qtd_el is not None else 1
+            session['romaneios'].append({'nome': nome, 'nota': nota, 'quantidade': quantidade})
+        return render_template("romaneio_xml_preencher.html", romaneios=session['romaneios'])
+    return render_template("romaneio_xml.html")
+
+@app.route('/romaneio_gerado', methods=['POST'])
+def romaneio_gerado_post():
+    total = int(request.form['total_linhas'])
+    romaneios_final = []
+    for i in range(total):
+        romaneios_final.append({
+            'nome': request.form[f'nome_{i}'],
+            'nota': request.form[f'nota_{i}'],
+            'quantidade': request.form[f'quantidade_{i}'],
+            'rastreio': request.form[f'rastreio_{i}']
+        })
+    from datetime import datetime
     data_atual = datetime.now().strftime('%d/%m/%Y')
-    total = sum([int(r['quantidade']) for r in romaneios])
-    return render_template('romaneio_gerado.html', romaneios=romaneios, data=data_atual, total=total)
+    return render_template("romaneio_gerado.html", romaneios=romaneios_final, data=data_atual, total=total)
 
 @app.route('/logout')
 def logout():
