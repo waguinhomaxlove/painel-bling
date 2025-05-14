@@ -1,37 +1,10 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Preencher Rastreios - Romaneio</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; background: #f3f3f3; }
-        h2 { color: #00cc66; }
-        form { background: #111; padding: 20px; border-radius: 10px; color: #00cc66; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #00cc66; color: white; }
-        input[type="text"] { width: 95%; padding: 6px; }
-        button {
-            margin-top: 20px;
-            background-color: #00cc66;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
-</head>
+<html><head><title>Preencher Rastreios</title></head>
 <body>
     <h2>Preencha os códigos de rastreio</h2>
     <form method="POST" action="/romaneio_gerado">
-        <table>
-            <tr>
-                <th>Nome do Cliente</th>
-                <th>Nota Fiscal</th>
-                <th>Quantidade</th>
-                <th>Código de Rastreio</th>
-            </tr>
+        <table border="1">
+            <tr><th>Nome</th><th>Nota</th><th>Quantidade</th><th>Rastreio</th></tr>
             {% for i, item in enumerate(romaneios) %}
             <tr>
                 <td><input type="hidden" name="nome_{{i}}" value="{{item.nome}}">{{item.nome}}</td>
@@ -44,5 +17,4 @@
         <input type="hidden" name="total_linhas" value="{{romaneios|length}}">
         <button type="submit">Gerar Romaneio</button>
     </form>
-</body>
-</html>
+</body></html>
