@@ -1,1 +1,22 @@
-<html><body><h1>romaneio_xml_preencher.html</h1></body></html>
+<!DOCTYPE html>
+<html>
+<head><title>Preencher Rastreios - Romaneio</title></head>
+<body>
+    <h2>Preencha os códigos de rastreio</h2>
+    <form method="POST" action="/romaneio_gerado">
+        <table border="1">
+            <tr><th>Nome</th><th>Nota</th><th>Quantidade</th><th>Rastreio</th></tr>
+            {% for item in romaneios %}
+            <tr>
+                <td><input type="hidden" name="nome_{{ loop.index0 }}" value="{{ item.nome }}">{{ item.nome }}</td>
+                <td><input type="hidden" name="nota_{{ loop.index0 }}" value="{{ item.nota }}">{{ item.nota }}</td>
+                <td><input type="hidden" name="quantidade_{{ loop.index0 }}" value="{{ item.quantidade }}">{{ item.quantidade }}</td>
+                <td><input type="text" name="rastreio_{{ loop.index0 }}" required></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <input type="hidden" name="total_linhas" value="{{ romaneios|length }}">
+        <button type="submit">Gerar Romaneio</button>
+    </form>
+</body>
+</html>
