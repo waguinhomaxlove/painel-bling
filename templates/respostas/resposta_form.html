@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerador de Respostas</title>
+    <style>
+        body { font-family: Arial; background: #f0f0f0; padding: 40px; }
+        .container { max-width: 700px; margin: auto; background: #111; color: #00cc66; padding: 25px; border-radius: 10px; }
+        input, select, button, textarea {
+            width: 100%; padding: 10px; margin-top: 10px;
+            border: none; border-radius: 5px;
+        }
+        button {
+            background: #00cc66; color: white; font-weight: bold; margin-top: 20px;
+        }
+        textarea { height: 300px; background: #222; color: #00ff99; font-family: monospace; }
+        h2 { text-align: center; color: #00cc66; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Gerar Resposta Automática</h2>
+        <form method="POST">
+            <label for="rastreio">Código de Rastreio:</label>
+            <input type="text" name="rastreio" required>
+
+            <label for="tipo">Tipo de Resposta:</label>
+            <select name="tipo" required>
+                <option value="transito">1 - Em trânsito</option>
+                <option value="entregue">2 - Entregue</option>
+                <option value="atraso">3 - Atraso</option>
+                <option value="extravio">5 - Extravio</option>
+                <option value="numero_nao_localizado">6 - Número não localizado</option>
+            </select>
+
+            <button type="submit">Gerar Resposta</button>
+        </form>
+
+        {% if resposta %}
+        <h3>Resposta Gerada:</h3>
+        <textarea readonly>{{ resposta }}</textarea>
+        {% endif %}
+    </div>
+</body>
+</html>
