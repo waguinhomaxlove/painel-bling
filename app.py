@@ -46,6 +46,21 @@ def romaneio_gerado_post():
     data_atual = datetime.now().strftime('%d/%m/%Y')
     return render_template("romaneio_gerado.html", romaneios=romaneios_final, data=data_atual, total=total)
 
+
+from flask import send_from_directory
+import glob
+
+@app.route('/respostas')
+def listar_respostas():
+    arquivos = glob.glob("templates/respostas/*.html")
+    nomes = [os.path.basename(a) for a in arquivos]
+    return render_template("listar_respostas.html", arquivos=nomes)
+
+@app.route('/respostas/<nome>')
+def exibir_resposta(nome):
+    return render_template(f"respostas/{nome}")
+
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

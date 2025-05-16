@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Respostas Salvas</title>
+    <style>
+        body { font-family: Arial; background: #f3f3f3; padding: 30px; }
+        h2 { color: #00cc66; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 10px 0; }
+        a { text-decoration: none; color: #00cc66; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h2>Respostas Salvas</h2>
+    <ul>
+        {% for arquivo in arquivos %}
+        <li><a href="/respostas/{{ arquivo }}">{{ arquivo }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
